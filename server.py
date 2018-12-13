@@ -1,4 +1,4 @@
-import os, urllib
+import base64, datetime, os, urllib
 from dotenv import load_dotenv
 from flask import Flask, request, redirect, render_template, session
 import requests
@@ -16,9 +16,26 @@ app.secret_key = CLIENT_SECRET
 def auth_header(access_token):
   return { 'Authorization': f'Bearer {access_token}' }
 
+def update_token(refresh_token):
+  client = f'{CLIENT_ID}:{CLIENT_SECRET}'
+  base64encoded = base64.b64encode(client.encode())
+  headers = {'Authorization': f'Basic {base64encoded.decode()}'}
+  payload = {'grant_type': 'refresh_token', 'refresh_token': refresh_token}
+  r = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=payload)
+  return r.json()
+
 @app.route('/')
 def index():
-  return render_template('index.html')
+  session['expires'] = datetime.datetime.now()
+  if 'access_token' in session and session['expires'] > datetime.datetime.now():
+    return render_template('index.html')
+  if 'spotify_id' in session:
+    user = db['users'].find_one({'spotify_id': session['spotify_id']})
+    token_info = update_token(user['refresh_token'])
+    session['access_token'] = token_info['access_token']
+    session['expires'] = datetime.datetime.now() + datetime.timedelta(0, token_info['expires_in'])
+    return render_template('index.html')
+  return redirect('/login')
 
 def create_playlist(name):
   r = requests.post(
@@ -76,7 +93,6 @@ auth_query_parameters = {
 
 @app.route('/login')
 def login():
-  print(auth_query_parameters)
   params = '&'.join([f'{key}={urllib.parse.quote(val)}' for key, val in auth_query_parameters.items()])
   return redirect(f'https://accounts.spotify.com/authorize?{params}')
 
@@ -105,5 +121,6 @@ def callback():
   post_data = r.json()
   user = create_user(post_data['access_token'], post_data['refresh_token'])
   session['access_token'] = post_data['access_token']
+  session['expires'] = datetime.datetime.now() + datetime.timedelta(0, post_data['expires_in'])
   session['spotify_id'] = user['spotify_id']
   return redirect('/')
