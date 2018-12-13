@@ -45,6 +45,17 @@ def create_playlist(name):
   )
   return r.json()
 
+def add_playlist(user, playlist_id, playlist_id_original):
+  playlist = {
+    'id': playlist_id,
+    'original_id': playlist_id_original,
+    'last_checked': datetime.datetime.utcnow(),
+  }
+  db['users'].find_one_and_update(
+    {'spotify_id': user},
+    {'$push': {'playlists': playlist}},
+  )
+
 def get_track_uris(data):
   return [item['track']['uri'] for item in data['items']]
 
@@ -63,11 +74,11 @@ def fork_playlist(playlist_uri):
   )
   data = r.json()
   created = create_playlist(data['name'])
+  add_playlist(session['spotify_id'], created['id'], playlist_id)
   # Switch to tracks as data, because the subsequent /tracks calls will return exactly that
   data = data['tracks']
   add_tracks(created['id'], get_track_uris(data))
   while data['next']:
-    print('next page')
     r = requests.get(
       f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
       headers=auth_header(session['access_token']),
@@ -102,6 +113,7 @@ def create_user(access_token, refresh_token):
   user = {
     'spotify_id': profile['id'],
     'refresh_token': refresh_token,
+    'playlists': [],
   }
   if not db['users'].find_one({ 'spotify_id': profile['id'] }):
     db['users'].insert_one(user)
