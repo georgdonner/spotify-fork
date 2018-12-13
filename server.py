@@ -4,10 +4,12 @@ from flask import Flask, request, redirect, render_template, session
 import requests
 import pymongo
 
+from users import Users
 from spotify import Spotify
 
 load_dotenv()
 db = pymongo.MongoClient(os.environ.get('MONGODB_URI'))['spotify-fork']
+users_db = Users(db)
 app = Flask(__name__)
 app.secret_key = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
@@ -24,17 +26,6 @@ def index():
     return render_template('index.html')
   return redirect('/login')
 
-def add_playlist(user, playlist_id, playlist_id_original):
-  playlist = {
-    'id': playlist_id,
-    'original_id': playlist_id_original,
-    'last_checked': datetime.datetime.utcnow(),
-  }
-  db['users'].find_one_and_update(
-    {'spotify_id': user},
-    {'$push': {'playlists': playlist}},
-  )
-
 def get_track_uris(data):
   return [item['track']['uri'] for item in data['items']]
 
@@ -48,7 +39,7 @@ def fork_playlist(spotify, playlist_uri):
   while data['next']:
     data = spotify.request(data['next'])
     spotify.add_tracks(created['id'], get_track_uris(data))
-  add_playlist(session['spotify_id'], created['id'], playlist_id)
+  users_db.add_playlist(session['spotify_id'], created['id'], playlist_id)
   return created
 
 @app.route('/fork', methods=['POST'])
@@ -62,23 +53,12 @@ def fork():
 def login():
   return redirect(Spotify.get_redirect_url())
 
-def create_user(spotify, refresh_token):
-  profile = spotify.get_profile()
-  user = {
-    'spotify_id': profile['id'],
-    'refresh_token': refresh_token,
-    'playlists': [],
-  }
-  if not db['users'].find_one({ 'spotify_id': profile['id'] }):
-    db['users'].insert_one(user)
-  return user
-
 @app.route('/callback')
 def callback():
   code = request.args['code']
   token_info = Spotify.exchange_code(code)
   spotify = Spotify(None, token_info['access_token'])
-  user = create_user(spotify, token_info['refresh_token'])
+  user = users_db.create_user(spotify, token_info['refresh_token'])
   session['access_token'] = token_info['access_token']
   session['expires'] = datetime.datetime.now() + datetime.timedelta(0, token_info['expires_in'])
   session['spotify_id'] = user['spotify_id']
