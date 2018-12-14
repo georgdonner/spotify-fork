@@ -4,11 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='index.css') }}">
   <title>Spotify Fork</title>
 </head>
 <body>
+  <h1>Spotify Fork</h1>
+  <p>
+    Fork a playlist and add or remove tracks as you like!
+    <br>
+    New tracks will be added automatically, so you won't miss out on anything.
+  </p>
   <form action="/fork" method="post">
     <input type="text" name="playlist" placeholder="Enter the Spotify Playlist URI">
   </form>
+  {% if playlists|length > 0 %}
+  <div>
+    <h2>Your forked playlists</h2>
+    <ul>
+    {% for playlist in playlists %}
+      <li>{{ playlist.name }}</li>
+    {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </body>
 </html>

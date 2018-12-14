@@ -18,8 +18,9 @@ class Users():
       self.collection.insert_one(user)
     return user
 
-  def add_playlist(self, user, playlist_id, playlist_id_original):
+  def add_playlist(self, user, name, playlist_id, playlist_id_original):
     playlist = {
+      'name': name,
       'id': playlist_id,
       'original_id': playlist_id_original,
       'last_checked': datetime.datetime.utcnow(),
