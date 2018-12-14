@@ -80,3 +80,11 @@ def update_playlists():
         i += 1
         split = new_tracks[(i * 100):(i * 100 + 100)]
   return 'OK', 200
+
+if __name__ == '__main__':
+  # Bind to PORT if defined, otherwise default to 5000.
+  port = int(os.environ.get('PORT', 5000))
+  if os.environ.get('FLASK_ENV') == 'development':
+    app.run(port=port)
+  else:
+    app.run(host='0.0.0.0', port=port)
