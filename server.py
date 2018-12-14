@@ -63,3 +63,20 @@ def callback():
   session['expires'] = datetime.datetime.now() + datetime.timedelta(0, token_info['expires_in'])
   session['spotify_id'] = user['spotify_id']
   return redirect('/')
+
+@app.route('/cron/update-playlists')
+def update_playlists():
+  users = users_db.get_all()
+  for user in users:
+    access_token = Spotify.update_token(user['refresh_token'])['access_token']
+    spotify = Spotify(user['spotify_id'], access_token)
+    for playlist in user['playlists']:
+      new_tracks = spotify.get_track_uris(playlist['original_id'], since=playlist['last_checked'])
+      users_db.playlist_updated(user['spotify_id'], playlist['id'])
+      i = 0
+      split = new_tracks[0:100]
+      while len(split) > 0:
+        spotify.add_tracks(playlist['id'], split)
+        i += 1
+        split = new_tracks[(i * 100):(i * 100 + 100)]
+  return 'OK', 200

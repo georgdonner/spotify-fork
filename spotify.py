@@ -1,4 +1,5 @@
 import base64, os, urllib
+import dateutil.parser
 import requests
 
 CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
@@ -36,11 +37,26 @@ class Spotify:
     return r.json()
   
   def add_tracks(self, playlist_id, track_uris):
-    requests.post(
+    return requests.post(
       f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
       headers=self.auth,
       json={'uris': track_uris},
     )
+
+  def get_track_uris(self, playlist_id, since=None):
+    items = []
+    r = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks', headers=self.auth)
+    data = r.json()
+    items += data['items']
+    while data['next']:
+      r = requests.get(data['next'], headers=self.auth)
+      data = r.json()
+      items += data['items']
+    if since:
+      def is_new(item, date):
+        return dateutil.parser.parse(item['added_at'], ignoretz=True) > date
+      items = [item for item in items if is_new(item, since) and not item['is_local']]
+    return [item['track']['uri'] for item in items]
 
   @staticmethod
   def get_playlist_id(playlist_uri):
