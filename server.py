@@ -25,7 +25,7 @@ def index():
     session['access_token'] = token_info['access_token']
     session['expires'] = datetime.datetime.now() + datetime.timedelta(0, token_info['expires_in'])
     return render_template('index.html', playlists=user['playlists'])
-  return redirect('/login')
+  return render_template('login.html', redirect_url=Spotify.get_redirect_url())
 
 def get_track_uris(data):
   return [item['track']['uri'] for item in data['items']]
@@ -49,10 +49,6 @@ def fork():
   spotify = Spotify(session['spotify_id'], session['access_token'])
   fork_playlist(spotify, playlist_uri)
   return redirect('/')
-
-@app.route('/login')
-def login():
-  return redirect(Spotify.get_redirect_url())
 
 @app.route('/callback')
 def callback():

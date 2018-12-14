@@ -33,3 +33,19 @@ form input {
   font-size: 1rem;
   box-sizing: border-box;
 }
+
+a.button {
+  color: white;
+  background: #1DB954;
+  border: 2px #1DB954 solid;
+  border-radius: 10px;
+  padding: .5rem 1rem;
+  text-decoration: none;
+  transition: color .5s ease;
+  transition: background .5s ease;
+}
+
+a.button:hover {
+  color: #1DB954;
+  background: white;
+}
