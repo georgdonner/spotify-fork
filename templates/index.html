@@ -22,7 +22,7 @@
     <h2>Your forked playlists</h2>
     <ul>
     {% for playlist in playlists %}
-      <li>{{ playlist.name }}</li>
+      <li><a href="spotify:user:{{ session['spotify_id'] }}:playlist:{{ playlist.id }}">{{ playlist.name }}</a></li>
     {% endfor %}
     </ul>
   </div>

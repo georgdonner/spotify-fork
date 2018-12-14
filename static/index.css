@@ -34,13 +34,21 @@ form input {
   box-sizing: border-box;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 a.button {
   color: white;
   background: #1DB954;
   border: 2px #1DB954 solid;
   border-radius: 10px;
   padding: .5rem 1rem;
-  text-decoration: none;
   transition: color .5s ease;
   transition: background .5s ease;
 }
@@ -48,4 +56,5 @@ a.button {
 a.button:hover {
   color: #1DB954;
   background: white;
+  text-decoration: none;
 }
