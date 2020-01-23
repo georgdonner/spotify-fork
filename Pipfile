@@ -9,6 +9,7 @@ flask = "*"
 python-dotenv = "*"
 pymongo = "*"
 python-dateutil = "*"
+gunicorn = "*"
 
 [dev-packages]
 pylint = "*"
