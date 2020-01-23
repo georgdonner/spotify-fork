@@ -30,6 +30,12 @@ class Users():
       {'$push': {'playlists': playlist}},
     )
 
+  def remove_playlist(self, user, playlist_id):
+    self.collection.find_one_and_update(
+      {'spotify_id': user},
+      {'$pull': {'playlists': {'id': playlist_id}}},
+    )
+
   def playlist_updated(self, user, playlist_id):
     self.collection.update_one(
       {'spotify_id': user, 'playlists.id': playlist_id},

@@ -50,6 +50,14 @@ def fork():
   fork_playlist(spotify, playlist_uri)
   return redirect('/')
 
+@app.route('/playlist/remove/<playlist_id>')
+def remove_playlist(playlist_id):
+  if session['spotify_id']:
+    spotify = Spotify(session['spotify_id'], session['access_token'])
+    spotify.remove_playlist(playlist_id)
+    users_db.remove_playlist(session['spotify_id'], playlist_id)
+  return redirect('/')
+
 @app.route('/callback')
 def callback():
   code = request.args['code']

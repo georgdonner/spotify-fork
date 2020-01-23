@@ -35,6 +35,12 @@ class Spotify:
       json={'name': name, 'public': False},
     )
     return r.json()
+
+  def remove_playlist(self, playlist_id):
+    return requests.delete(
+      f'https://api.spotify.com/v1/playlists/{playlist_id}/followers',
+      headers=self.auth
+    )
   
   def add_tracks(self, playlist_id, track_uris):
     return requests.post(

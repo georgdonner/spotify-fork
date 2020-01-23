@@ -5,7 +5,6 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   margin: 0 auto;
 }
 
@@ -17,7 +16,6 @@ p {
   color: #666;
   font-size: 1.1rem;
   line-height: 1.5;
-  text-align: center;
 }
 
 form {
@@ -30,8 +28,20 @@ form input {
   border: 2px #e2e2e2 solid;
   border-radius: 10px;
   padding: .75rem;
-  font-size: 1rem;
+  font-size: 1.1rem;
   box-sizing: border-box;
+}
+
+ul {
+  margin-top: 1.5rem;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+ul li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
 }
 
 a {
@@ -57,4 +67,8 @@ a.button:hover {
   color: #1DB954;
   background: white;
   text-decoration: none;
+}
+
+a.delete {
+  color: #c9342c;
 }
