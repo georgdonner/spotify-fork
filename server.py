@@ -8,7 +8,7 @@ from users import Users
 from spotify import Spotify
 
 load_dotenv()
-db = pymongo.MongoClient(os.environ.get('MONGODB_URI'))['spotify-fork']
+db = pymongo.MongoClient(os.environ.get('MONGODB_URI'))[os.environ.get('MONGODB_NAME')]
 users_db = Users(db)
 app = Flask(__name__)
 app.secret_key = os.environ.get('SPOTIFY_CLIENT_SECRET')
